@@ -71,16 +71,11 @@ class INTEGER
 
 	fmpz_t value; 						//changed MPINT to FLINT
 
-
-
 	INTEGER(fmpz_t y);					//changed MPINT to FLINT
-
-
 
 	friend INTEGER numerator(const RATIONAL &);
 
 	friend INTEGER denominator(const RATIONAL &);
-
 
 
 	friend class RATIONAL;
@@ -90,14 +85,21 @@ class INTEGER
 	friend class DYADIC;
 
 
+	/* internal tag type to indicate the MP_int_type passed to INTEGER's
+	 * constructor is supposed to be moved and not copied (in case MP_int_type
+	 * matches one of the other conversion sources like e.g. mpz_srcptr). */
+	struct move_t {};
+
+	INTEGER(fmpz_t y, move_t);
 
 public:
 
+#if iRRAM_HAVE_GMP_C
+	explicit INTEGER(mpz_srcptr);
+#endif
 
 
 /****** Constructors ******/
-
-
 
 INTEGER(int i = 0);
 
@@ -299,7 +301,17 @@ inline INTEGER::~INTEGER() { if (value) fmpz_clear(value); }			//fmpz_clear nun 
 
 inline INTEGER::INTEGER(fmpz_t y) : value{*y} {}							//fmpz-Konstruktor
 
+inline INTEGER::INTEGER(fmpz_t y, INTEGER::move_t) : value{*y} {}
 
+
+#if iRRAM_HAVE_GMP_C
+//inline INTEGER::INTEGER(mpz_srcptr p);
+/*
+{
+	MP_int_duplicate_w_init(p, value);
+}
+*/
+#endif
 
 inline INTEGER::INTEGER(int i){
 
@@ -382,24 +394,19 @@ inline INTEGER& INTEGER::operator = (const int y){
 inline INTEGER scale(const INTEGER& x, const int n)
 
 {
-
 	fmpz_t zvalue;
 	fmpz_init(zvalue);
 
-	if(n>=0){						//Fallunterscheidung, je nachdem ob n größer oder kleiner 0. Cast implizit?
+	if(n>=0){							//Fallunterscheidung, je nachdem ob n größer oder kleiner 0. Cast implizit?
 	fmpz_mul_2exp(zvalue,x.value ,n); 	//Funktion nimmt nur ulongs für n. Ist der Cast implizit?
 	}	
 	else{
-	int m = -n;
+	int m = -n;							//!2er-Komplement.
 	fmpz_tdiv_q_2exp(zvalue, x.value, m);
 	}
 	
-	return zvalue;
-
+	return { zvalue, INTEGER::move_t{} };
 }
-
-
-
 
 
 //****************************************************************************************
@@ -410,8 +417,8 @@ inline INTEGER scale(const INTEGER& x, const int n)
 
 //****************************************************************************************
 
-inline int sign(const INTEGER& x){  return fmpz_sgn(x.value); }			//fmpz_sgn macht genau, was gefordert ist, -1,0,1
 
+inline int sign(const INTEGER& x){  return fmpz_sgn(x.value); }			//fmpz_sgn macht genau, was gefordert ist, -1,0,1
 
 
 //****************************************************************************************
@@ -423,9 +430,7 @@ inline int sign(const INTEGER& x){  return fmpz_sgn(x.value); }			//fmpz_sgn mac
 //****************************************************************************************
 
 
-
 inline int size(const INTEGER& x){ return fmpz_size(x.value);}			//fmpz_size returns number of bits used to store the value
-
 
 
 //****************************************************************************************
@@ -450,7 +455,7 @@ inline INTEGER power(const INTEGER& x, unsigned n)
 
 	fmpz_pow_ui(zvalue,x.value,n);										//initiiert nun fmpz und benutzt _pow_ui
 
-	return zvalue;
+	return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -492,12 +497,6 @@ inline INTEGER operator >> (const INTEGER& x, const int n){
 
 
 
-
-
-
-
-
-
 //****************************************************************************************
 
 // Addition: returns x + y
@@ -514,7 +513,7 @@ inline INTEGER operator + (const INTEGER& x, const INTEGER& y){
 
   fmpz_add(zvalue,x.value,y.value);									//fmpz_add benutzt
 
-  return zvalue;
+return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -530,7 +529,7 @@ inline INTEGER operator + (const INTEGER& x, const int y){
 
   else     fmpz_add_ui(zvalue,x.value,y);							//fmpz_add_ui
 
-  return zvalue;
+  return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -592,7 +591,7 @@ inline INTEGER operator - (const INTEGER& x, const INTEGER& y){
 
   fmpz_sub(zvalue,x.value,y.value);									//fmpz_sub benutzt
 
-  return zvalue;
+  return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -654,7 +653,7 @@ inline INTEGER operator - (const INTEGER& x){
 
   fmpz_neg(zvalue,x.value);												//negiert den value von x
 
-  return zvalue;
+  return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -669,29 +668,25 @@ inline INTEGER operator - (const INTEGER& x){
 
 
 inline INTEGER operator * (const INTEGER& x, const INTEGER& y){
-
   fmpz_t zvalue;
 
   fmpz_init(zvalue);
 
   fmpz_mul(zvalue,x.value,y.value);										//fmpz_mul
 
-  return zvalue;
-
+  return { zvalue, INTEGER::move_t{} };
 }
 
 
 
 inline INTEGER operator * (const INTEGER& x, const int y){
-
   fmpz_t zvalue;
 
   fmpz_init(zvalue);
 
   fmpz_mul_si(zvalue,x.value,y);										//fmpz_mul_si
 
-  return(zvalue);
-
+  return { zvalue, INTEGER::move_t{} };
 }
 
 
@@ -752,7 +747,7 @@ inline INTEGER operator / (const INTEGER& x, const INTEGER& y){
 
   fmpz_tdiv_q(zvalue, x.value, y.value);								//rundet zur 0
 
-  return zvalue;
+  return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -768,7 +763,7 @@ inline INTEGER operator / (const INTEGER& x, const int n){
 
   fmpz_tdiv_q_si(zvalue, x.value, n);									//fmpz kann vorzeichen bei Division beachten, daher hier kürzer.			
 
-  return zvalue;
+  return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -817,14 +812,14 @@ inline INTEGER& operator /= (INTEGER& x, int n)
 
 
 inline INTEGER operator % (const INTEGER& x, const INTEGER& y){
-
+	
 	fmpz_t zvalue;
 
 	fmpz_init(zvalue);
 
 	fmpz_mod(zvalue,x.value,y.value);											//mit fmpz_mod
 
-	return zvalue;
+	return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -862,7 +857,7 @@ inline INTEGER sqrt (const INTEGER& x)
 
 	fmpz_sqrt(zvalue, x.value);													// mit fmpz_sqrt (integer part)
 
-	return zvalue;
+	return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -892,7 +887,7 @@ inline INTEGER abs (const INTEGER& x)
 
 	fmpz_abs(zvalue,x.value);													//mit fmpz_abs
 
-	return zvalue;
+	return { zvalue, INTEGER::move_t{} };
 
 }
 
@@ -1052,11 +1047,7 @@ inline std::string swrite(const INTEGER& x){
 
     return result;
 
-	
-
 }
-
-
 
 // Conversion from INTEGER to smaller types
 
