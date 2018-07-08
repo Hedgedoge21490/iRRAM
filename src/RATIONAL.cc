@@ -45,6 +45,9 @@ Changelog: (initial version by Tom, all modifications by Norbert and Franz)
 #include <iRRAM/RATIONAL.h>
 #include <iRRAM/INTEGER.h>
 
+#include <flint/fmpz.h>
+#include <flint/fmpq.h>
+
 namespace iRRAM {
 
 //****************************************************************************************
@@ -56,34 +59,38 @@ namespace iRRAM {
 // Constructing RATIONAL from scratch
 //****************************************************************************************
 
-RATIONAL::RATIONAL(const INTEGER& i,const INTEGER& j){
-  MP_rat_init(value);
-  MP_INTINTEGER_to_RATIONAL(i.value,j.value,value);
+RATIONAL::RATIONAL(const INTEGER& i,const INTEGER& j){			//Ich gehe davon aus, dass hier i der Zähler ist.
+  fmpq_init(value);
+  fmpq_set_fmpz_frac(fmpq_t value , i.value, j.value)			//value = i / j
 }
 
 RATIONAL::RATIONAL(int i, int j){
-  MP_rat_init(value);
+  fmpq_init(value);
   if ( j >= 0) {
-	MP_intint_to_RATIONAL(i,(unsigned int)(j),value);
+	mpq_set_si(value, i, (ulong)(j))							//cast war vorher mit (unsigned int)
 	} else {
 	INTEGER ii(i);
 	INTEGER jj(j);
-	MP_INTINTEGER_to_RATIONAL(ii.value,jj.value,value);
+	fmpq_set_fmpz_frac(fmpq_t value , ii.value, jj.value)
 	}
 }
 
-RATIONAL::RATIONAL(const INTEGER& i){
-  MP_rat_init(value);
-  MP_INTEGER_to_RATIONAL(i.value,value);
+RATIONAL::RATIONAL(const INTEGER& i){							//ich vermute mal, dass hier einfach Zähler i und Nenner 1 sind.
+  fmpq_init(value);
+  fmpz_t one;
+  fmpz_init(one);
+  fmpz_one(one);
+  fmpq_set_fmpz_frac(fmpq_t value , i.value, one)
 }
 
 RATIONAL::RATIONAL(int i) {
-  MP_rat_init(value);
-  MP_int_to_RATIONAL(i,value);
+  fmpq_init(value);
+  fmpq_set_si(value, i, 1);										//erzeugt fmpq mit Wert i
 }
 
 RATIONAL::RATIONAL(const RATIONAL& y){
-  MP_rat_duplicate_w_init(y.value, value);
+  fmpq_init(value);
+  fmpq_set(value, y.value);										//erzeugt Kopie
 }
 
 
@@ -91,7 +98,7 @@ RATIONAL::RATIONAL(const RATIONAL& y){
 // Constructing RATIONAL from double, the result is NOT rounded
 //****************************************************************************************
 
-RATIONAL::RATIONAL(double d){
+RATIONAL::RATIONAL(double d){			//finde ich nicht
   MP_rat_init(value);
   MP_double_to_RATIONAL(d,value);
 }
@@ -100,7 +107,7 @@ RATIONAL::RATIONAL(double d){
 // Constructing RATIONAL from string, the string must be in decimal base
 //****************************************************************************************
 
-RATIONAL::RATIONAL(const char* s){
+RATIONAL::RATIONAL(const char* s){		//finde ich nicht
   MP_rat_init(value);
   MP_string_to_RATIONAL(s,value);
 }
@@ -110,15 +117,15 @@ RATIONAL::RATIONAL(const char* s){
 // left side (this) is already initialized
 //******************************************************************************
 
-RATIONAL & RATIONAL::operator=(RATIONAL y)
+RATIONAL & RATIONAL::operator=(RATIONAL y)			//kein Plan, was std::swap macht aber ändert wohl nichts
 {
 	using std::swap;
 	swap(value, y.value);
 	return *this;
 }
 
-RATIONAL& RATIONAL::operator = (int y){
-  MP_int_to_RATIONAL(y,value);
+RATIONAL& RATIONAL::operator = (int y){				//setzt value auf fmpq mit wert i
+  fmpq_set_si(value, i, 1);
   return (*this);
 }
 
@@ -128,7 +135,7 @@ RATIONAL& RATIONAL::operator = (int y){
 //******************************************************************/
 
 RATIONAL::~RATIONAL(){
-  if (value) MP_rat_clear(value);
+  if (value) fmpq_clear(value);						//fmpq_clear
 }
 
 //****************************************************************************************
@@ -138,7 +145,7 @@ RATIONAL::~RATIONAL(){
 /*! \ingroup maths */
 int sign(const RATIONAL& x)
 {
-  return MP_rat_sign(x.value);
+  return fmpq_sgn(x.value);							//fmpq_sgn
 }
 
 //****************************************************************************************
@@ -148,8 +155,12 @@ int sign(const RATIONAL& x)
 
 RATIONAL scale(RATIONAL x, int n)
 {
-	MP_rat_shift(x.value,x.value,n);
-	return x;
+	if(n >= 0){
+		fmpq_mul_2exp(x.value,x.value,n);
+	}else{
+		n = -n;
+		fmpq_div_2exp(x.value,x.value,n);
+	}
 }
 
 
@@ -159,13 +170,13 @@ RATIONAL scale(RATIONAL x, int n)
 
 RATIONAL& operator += (RATIONAL& x, const RATIONAL& y)
 {
-  MP_rat_add(x.value,y.value,x.value);
+  fmpq_add(x.value,x.value,y.value);					//ganz normal x = x + y
   return x;
 }
 
 RATIONAL & operator+=(RATIONAL &x, int y)
 {
-	MP_rat_add_si_inplace(y,x.value);
+	fmpq_add_si(x.value, x.value, y);					//was war das inplace?
 	return x;
 }
 
@@ -175,13 +186,13 @@ RATIONAL & operator+=(RATIONAL &x, int y)
 
 RATIONAL operator-(int x, RATIONAL y)
 {
-	MP_rat_neg(y.value, y.value);
+	fmpq_neg(y.value, y.value);
 	y += x;
 	return y;
 }
 
 RATIONAL& operator -= (RATIONAL& x, const RATIONAL& y){
-  MP_rat_sub(x.value,y.value,x.value);
+  fmpq_sub(x.value,x.value,y.value);								//x = x - y
   return x;
 }
 
@@ -191,7 +202,7 @@ RATIONAL& operator -= (RATIONAL& x, const RATIONAL& y){
 
 RATIONAL operator-(RATIONAL x)
 {
-	MP_rat_neg(x.value, x.value);
+	fmpq_neg(x.value, x.value);										//fmpq neg
 	return x;
 }
 
@@ -200,13 +211,16 @@ RATIONAL operator-(RATIONAL x)
 //******************************************************************************
 
 RATIONAL& operator *= (RATIONAL& x, const RATIONAL& y){
-  MP_rat_mul(x.value,y.value,x.value);
+  fmpq_mul(x.value,x.value,y.value);							//x = x * y
   return x;
 }
 
-RATIONAL & operator*=(RATIONAL &x, const int n)
+RATIONAL & operator*=(RATIONAL &x, const int n)					//es gibt kein mul_si also workaround mit mul_fmpz
 {
-	MP_rat_mul_si(x.value, n, x.value);
+	fmpz_t fac;
+	fmpz_init(fac);													
+	fmpz_set_si(fac, n);	
+	fmpq_mul_fmpz(x.value, x.value, fac);
 	return x;
 }
 
@@ -214,21 +228,26 @@ RATIONAL & operator*=(RATIONAL &x, const int n)
 // Division
 //******************************************************************************
 
-RATIONAL operator / (int x, RATIONAL y)
+RATIONAL operator / (int x, RATIONAL y)							//Erstellen eines fmpq aus x wie im Konstruktor
 {
-  MP_rat_si_div(x,y.value,y.value);
+  fmpq_init(denominator);
+  fmpq_set_si(denominator, x, 1);
+  fmpq_div(y.value,denominator,y.value);
   return y;
 }
 
 RATIONAL& operator /= (RATIONAL& x, const RATIONAL& y){
-  MP_rat_div(x.value,y.value,x.value);
+  fmpq_div(x.value,x.value,y.value);
   return x;
 }
 
-RATIONAL& operator /= (RATIONAL& x, const int n)
+RATIONAL& operator /= (RATIONAL& x, const int n)				//es gibt kein div_si also workaround mit div_fmpz
 {
-	MP_rat_div_si(x.value,n,x.value);
-	return x;
+  fmpz_t q;
+  fmpz_init(q);													
+  fmpz_set_si(q, y);
+  fmpq_div_fmpz(y.value,y.value,q);
+  return y;
 }
 
 
@@ -239,27 +258,27 @@ RATIONAL& operator /= (RATIONAL& x, const int n)
 /*! \ingroup maths */
 RATIONAL abs(RATIONAL x)
 {
-	MP_rat_abs(x.value,x.value);
+	fmpq_abs(x.value,x.value);									//check
 	return x;
 }
 
 INTEGER denominator (const RATIONAL& x){
-  MP_int_type zvalue;
-  MP_int_init(zvalue);
-  MP_rat_get_denominator(x.value,zvalue);
+  fmpz_t zvalue;
+  fmpz_init(zvalue);
+  zvalue = x.value.num;											//fmpq ist struct aus fmpz_t namens num und den
   return { zvalue, INTEGER::move_t{} };
 }
 
 INTEGER numerator (const RATIONAL& x){
-  MP_int_type zvalue;
-  MP_int_init(zvalue);
-  MP_rat_get_numerator(x.value,zvalue);
+  fmpz_t zvalue;
+  fmpz_init(zvalue);
+  zvalue = x.value.den;											//fmpq ist struct aus fmpz_t namens num und den
   return { zvalue, INTEGER::move_t{} };
 }
 
-RATIONAL power(RATIONAL x, unsigned n)
+RATIONAL power(RATIONAL x, slong n)								// nie ist etwas unsigned, außer wenn flint signed benutzt ._."
 {
-	MP_rat_power(x.value, n, x.value);
+	fmpq_pow_si(x.value, x.value, n);
 	return x;
 }
 
@@ -269,7 +288,7 @@ RATIONAL power(RATIONAL x, unsigned n)
 //****************************************************************************************
 
 bool operator < (const RATIONAL& x, const RATIONAL& y){
-  return (MP_rat_compare(x.value,y.value) < 0 );
+  return (fmpq_cmp(x.value,y.value) < 0 );						//fein
 }
 
 //****************************************************************************************
@@ -278,7 +297,7 @@ bool operator < (const RATIONAL& x, const RATIONAL& y){
 //****************************************************************************************
 
 bool operator == (const RATIONAL& x, const RATIONAL& y){
-  return (MP_rat_equal(x.value,y.value));
+  return (fmpq_equal(x.value,y.value));							//fein
 }
 
 
@@ -287,24 +306,24 @@ bool operator == (const RATIONAL& x, const RATIONAL& y){
 // string function for RATIONAL
 // writes rational into string
 //*****************************************************************************
-
+/*
 std::string swrite(const RATIONAL& x, const int w){
      char* erg= MP_rat_swritee(x.value,w);
      std::string result=erg;
      free(erg);
      return result;
 }
-
+*/
 //****************************************************************************************
 // swrite: writes RATIONAL to string
 // 1. argument: RATIONAL
 //****************************************************************************************
-
+/*
 std::string swrite(const RATIONAL& x){
      char* erg= MP_rat_sprintf(x.value);
      std::string result=erg;
      free(erg);
      return result;  
 }
-
+*/
 } // namespace iRRAM

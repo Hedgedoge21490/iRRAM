@@ -27,6 +27,8 @@ MA 02111-1307, USA.
 #define iRRAM_RATIONAL_H
 
 #include <iRRAM/core.h>
+#include <flint/fmpz.h>
+#include <flint/fmpq.h>
 
 namespace iRRAM {
 
@@ -34,8 +36,8 @@ namespace iRRAM {
 class RATIONAL
 {
 	/****** Private ******/
-	MP_rat_type value;
-	RATIONAL(MP_rat_type y) : value(y) {}
+	fmpq_t value;
+	RATIONAL(fmpq_t y) : value{*y} {}					//Das selbe Array Problem?
 
 public:
 
@@ -51,7 +53,7 @@ RATIONAL(const char* s);
 RATIONAL(const INTEGER& y);
 //RATIONAL(const DYADIC& y); 
 RATIONAL(const RATIONAL& y);
-RATIONAL(RATIONAL &&y) : value(y.value) { y.value = nullptr; }
+//RATIONAL(RATIONAL &&y) : value(y.value) { y.value = nullptr; }
 
 RATIONAL(int i, int j);
 RATIONAL(const INTEGER& x, const INTEGER& y);
