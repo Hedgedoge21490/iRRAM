@@ -899,8 +899,8 @@ INTEGER REAL::as_INTEGER() const
 		return this->mp_conv().as_INTEGER();
 	}
 	MP_int_type result, value;
-	if (get_cached(result)) {
-		MP_int_duplicate_w_init(result, value);
+	if (get_cached(result)) {								// cache für Korrektheit.Template guckt im cache nach. cache.h ganz unten mp int type
+ 		MP_int_duplicate_w_init(result, value);
 		return { value, INTEGER::move_t{} };
 	}
 

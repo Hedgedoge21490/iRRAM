@@ -230,7 +230,7 @@ inline INTEGER scale(const INTEGER& x, const int n)
 	fmpz_mul_2exp(zvalue,x.value ,n); 	//Funktion nimmt nur ulongs für n. Ist der Cast implizit?
 	}	
 	else{
-	int m = -n;							//!2er-Komplement.
+	int m = -n;							//!2er-Komplement.  unsigned int hier.
 	fmpz_tdiv_q_2exp(zvalue, x.value, m);
 	}
 	return { zvalue, INTEGER::move_t{} };
