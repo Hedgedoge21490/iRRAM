@@ -898,9 +898,10 @@ INTEGER REAL::as_INTEGER() const
 	if (!this->value) {
 		return this->mp_conv().as_INTEGER();
 	}
-	MP_int_type result, value;
+	fmpz_t result, value;									//statt MP_int_type
 	if (get_cached(result)) {								// cache für Korrektheit.Template guckt im cache nach. cache.h ganz unten mp int type
- 		MP_int_duplicate_w_init(result, value);
+ 		//MP_int_duplicate_w_init(result, value);
+		fmpz_init_set(value,result);		//statt ^
 		return { value, INTEGER::move_t{} };
 	}
 
@@ -918,11 +919,13 @@ INTEGER REAL::as_INTEGER() const
 		             this->error.mantissa, this->error.exponent);
 		iRRAM_REITERATE(-y.error.exponent);
 	}
-	MP_int_init(value);
-	MP_mp_to_INTEGER(y.value, value);
-
+	fmpz_init(value);							//fmpz nun.
+	//MP_mp_to_INTEGER(y.value, value);			//Benutzt bestimmt mpz intern.
+	mpfr_to_INTEGER(y.value, value);
+	
 	if (actual_stack().inlimit == 0) { /* TODO: ... or duplicate the MP_*_types */
-		MP_int_duplicate_w_init(value, result);
+		//MP_int_duplicate_w_init(value, result);
+		fmpz_init_set(result,value);		//statt ^
 		put_cached(result);
 	}
 	return { value, INTEGER::move_t{} };
@@ -934,8 +937,8 @@ REAL::REAL(const RATIONAL & r)
 {
 	INTEGER numi, deni;
 
-	MP_rat_get_numerator(r.value, numi.value);
-	MP_rat_get_denominator(r.value, deni.value);
+	numi = numerator(r);				//ersetzt durch die fmpq-Funktionen
+	deni = denominator(r);
 
 	REAL result = REAL(numi) / REAL(deni);
 	result.mp_conv();
@@ -947,7 +950,8 @@ REAL::REAL(const RATIONAL & r)
 REAL::REAL(const INTEGER & y)
 {
 	MP_init(value);
-	MP_INTEGER_to_mp(y.value, value);
+	//MP_INTEGER_to_mp(y.value, value);
+	INTEGER_to_mpfr(y.value, value);
 	sizetype_exact(error);
 	MP_getsize(value, vsize);
 }

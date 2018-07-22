@@ -31,6 +31,8 @@ MA 02111-1307, USA.
 #include <iRRAM/core.h>
 #include <flint/fmpz.h>
 
+#include <mpfr.h>
+
 namespace iRRAM {
 
 /*! \ingroup types */
@@ -206,6 +208,21 @@ inline INTEGER::INTEGER(const char* s){
 }
 
 inline INTEGER::INTEGER(const std::string &s) : INTEGER(s.c_str()) {}
+
+// mpfr to INTEGER
+
+inline void mpfr_to_INTEGER(MP_type x, fmpz_t f){
+	//fmpz_set_mpfr(x, f, MPFR_RNDZ); existiert leider nicht.
+
+	MP_int_type r;
+	MP_int_init(r);
+	MP_mp_to_INTEGER(x,r);
+	fmpz_set_mpz(f,r);
+}
+
+inline void INTEGER_to_mpfr(const fmpz_t input, MP_type output){
+	fmpz_get_mpfr(output, input, MPFR_RNDZ);
+}
 
 // operator zwischen INTEGER und INTEGER Objekt zum Gleichsetzen.
 

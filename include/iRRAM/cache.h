@@ -148,25 +148,27 @@ template <> struct is_cacheable<double> : std::true_type {};
 template <> struct is_cacheable<void *> : std::true_type {};
 template <> struct is_cacheable<MP_type> : std::true_type {};
 template <> struct is_cacheable<MP_int_type> : std::true_type {};
+template <> struct is_cacheable<fmpz_t> : std::true_type {};			//geändert zu fmpz_t
 template <> struct is_cacheable<std::string> : std::true_type {};
 template <> struct is_cacheable<std::ostream *> : std::true_type {};
 template <> struct is_cacheable<std::istream *> : std::true_type {};
 
 struct mv_cache final
 : cache<bool>
-, cache<short> // unused
-, cache<unsigned short> // unused
+, cache<short> 				// unused
+, cache<unsigned short> 	// unused
 , cache<int>
-, cache<unsigned int> // unused
-, cache<long> // unusused
-, cache<unsigned long> // unused
-, cache<long long> // unused
+, cache<unsigned int> 		// unused
+, cache<long>				// unused
+, cache<unsigned long>		// unused
+, cache<long long> 			// unused
 , cache<unsigned long long> // unused
-, cache<float> // unused
-, cache<double> // unused
-, cache<void*> // unused
+, cache<float> 				// unused
+, cache<double> 			// unused
+, cache<void*> 				// unused
 , cache<MP_type>
-, cache<MP_int_type>
+, cache<MP_int_type>					
+, cache<fmpz_t>				//geändert zu fmpz_t
 , cache<std::string>
 , cache<std::ostream*>
 , cache<std::istream*>
