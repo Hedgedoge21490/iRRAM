@@ -218,6 +218,7 @@ inline void mpfr_to_INTEGER(MP_type x, fmpz_t f){
 	MP_int_init(r);
 	MP_mp_to_INTEGER(x,r);
 	fmpz_set_mpz(f,r);
+	//freigeben von r
 }
 
 inline void INTEGER_to_mpfr(const fmpz_t input, MP_type output){

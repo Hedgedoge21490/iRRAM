@@ -898,10 +898,10 @@ INTEGER REAL::as_INTEGER() const
 	if (!this->value) {
 		return this->mp_conv().as_INTEGER();
 	}
-	fmpz_t result, value;									//statt MP_int_type
+	fmpz result, value;									//statt MP_int_type
 	if (get_cached(result)) {								// cache für Korrektheit.Template guckt im cache nach. cache.h ganz unten mp int type
  		//MP_int_duplicate_w_init(result, value);
-		fmpz_init_set(value,result);		//statt ^
+		fmpz_init_set(&value,&result);						//statt ^
 		return { value, INTEGER::move_t{} };
 	}
 
