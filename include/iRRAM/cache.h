@@ -27,6 +27,8 @@ MA 02111-1307, USA.
 
 #include <string>
 #include <vector>
+#include <flint/fmpz.h>
+
 
 namespace iRRAM {
 
@@ -50,7 +52,9 @@ struct wrap_type {
 	wrap_type & operator=(wrap_type o) noexcept(noexcept(std::swap(v, o.v)))
 	{ using std::swap; swap(v, o.v); return *this; }
 
-	operator T() const noexcept { return v; }
+	operator T() const noexcept { 
+		return v; 
+	}
 };
 
 template <typename T> struct get_type {
@@ -72,6 +76,12 @@ template <> struct get_type<MP_int_type> {
 	typedef wrap_type<MP_int_type,clear> type;
 };
 
+
+//Das hier scheint nötig..
+template <> struct get_type<fmpz_t> {
+	static void clear(fmpz_t &t){ if (t) fmpz_clear(t); }
+	typedef wrap_type<fmpz_t,clear> type;
+};
 
 struct cache_type
 {

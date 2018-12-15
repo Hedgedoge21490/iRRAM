@@ -902,7 +902,7 @@ INTEGER REAL::as_INTEGER() const
 	if (get_cached(result)) {								// cache für Korrektheit.Template guckt im cache nach. cache.h ganz unten mp int type
  		//MP_int_duplicate_w_init(result, value);
 		fmpz_init_set(&value,&result);						//statt ^
-		return { value, INTEGER::move_t{} };
+		return { &value, INTEGER::move_t{} };
 	}
 
 	sizetype psize;
@@ -919,16 +919,16 @@ INTEGER REAL::as_INTEGER() const
 		             this->error.mantissa, this->error.exponent);
 		iRRAM_REITERATE(-y.error.exponent);
 	}
-	fmpz_init(value);							//fmpz nun.
+	fmpz_init(&value);							//fmpz nun.
 	//MP_mp_to_INTEGER(y.value, value);			//Benutzt bestimmt mpz intern.
-	mpfr_to_INTEGER(y.value, value);
+	mpfr_to_INTEGER(y.value, &value);
 	
 	if (actual_stack().inlimit == 0) { /* TODO: ... or duplicate the MP_*_types */
 		//MP_int_duplicate_w_init(value, result);
-		fmpz_init_set(result,value);		//statt ^
+		fmpz_init_set(&result,&value);		//statt ^
 		put_cached(result);
 	}
-	return { value, INTEGER::move_t{} };
+	return { &value, INTEGER::move_t{} };
 }
 
 // conversion to type REAL from smaller types
