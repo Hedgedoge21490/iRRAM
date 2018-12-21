@@ -78,9 +78,9 @@ template <> struct get_type<MP_int_type> {
 
 
 //Das hier scheint nötig..
-template <> struct get_type<fmpz_t> {
-	static void clear(fmpz_t &t){ if (t) fmpz_clear(t); }
-	typedef wrap_type<fmpz_t,clear> type;
+template <> struct get_type<fmpz> {
+	static void clear(fmpz &t){ if (t) fmpz_clear(&t); }
+	typedef wrap_type<fmpz,clear> type;
 };
 
 struct cache_type

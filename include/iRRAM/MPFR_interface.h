@@ -26,6 +26,7 @@ MA 02111-1307, USA.
 
 #include <iRRAM/GMP_intrat.h>
 #include <mpfr.h>
+#include <flint/fmpz.h>
 
 # ifndef BITS_PER_MP_LIMB
 #  define BITS_PER_MP_LIMB GMP_LIMB_BITS
@@ -261,7 +262,7 @@ extern "C" {
 #endif
 
 typedef struct {unsigned int mantissa; int exponent; } ext_mpfr_sizetype;
-typedef mpz_ptr  int_mpfr_type;
+typedef fmpz  int_mpfr_type;
 
 #define iRRAM_EXT_MPFR_CACHE_SIZE 1000 /* TODO: make adjustable during init() */
 

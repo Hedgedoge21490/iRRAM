@@ -451,9 +451,10 @@ inline void ext_mpfr_shift(const mpfr_t z1,mpfr_t z,int n)
 
 inline void ext_mpfr_set_z(mpfr_t r,int_mpfr_type i)
 {
-  int sib=mpz_sizeinbase(i,2);
+  int sib= fmpz_sizeinbase(&i,2);
   mpfr_set_prec(r,MAX_OF(32,sib));
-  mpfr_set_z(r,i,iRRAM_mpfr_rounding_mode);
+  //mpfr_set_z(r,i,iRRAM_mpfr_rounding_mode);
+  fmpz_get_mpfr(r, &i, iRRAM_mpfr_rounding_mode);
 } 
 
 #endif
