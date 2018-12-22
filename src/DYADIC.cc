@@ -48,7 +48,7 @@ DYADIC::DYADIC(const int i) {
 }
 
 DYADIC::DYADIC(const INTEGER& i) {
-   MP_init(value);MP_INTEGER_to_mp(i.value,value);
+   MP_init(value);MP_INTEGER_to_mp(&i,value);
 }
 
 DYADIC::DYADIC(const DYADIC& y) { 

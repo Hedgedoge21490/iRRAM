@@ -79,7 +79,8 @@ MA 02111-1307, USA.
 	} while (0)
 #define MP_int_to_INTEGER(i,z)	mpz_set_si(z,i)
 
-#define MP_INTEGER_to_mp(i,r)	ext_mpfr_set_z(r,i)
+//#define MP_INTEGER_to_mp(i,r)	ext_mpfr_set_z(r,i)
+#define MP_INTEGER_to_mp(i,r)	fmpz_get_mpfr(r, i, MPFR_RNDZ);
 #define MP_INTEGER_to_int(z)	mpz_get_si(z)
 
 #define MP_mp_to_INTEGER(r,i)	mpfr_get_z(i,r,MPFR_RNDZ)
