@@ -35,15 +35,18 @@ namespace iRRAM {
 /*! \ingroup types */
 class RATIONAL
 {
+public:	
 	/****** Private ******/
+
 	fmpq_t value;
 	RATIONAL(fmpq_t y) : value{*y} {}					//Das selbe Array Problem?
 
-public:
+
 
 friend class INTEGER;
 friend class DYADIC;
 friend class REAL;
+
 
 /****** Constructors ******/
 

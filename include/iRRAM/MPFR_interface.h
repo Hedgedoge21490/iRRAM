@@ -27,6 +27,7 @@ MA 02111-1307, USA.
 #include <iRRAM/GMP_intrat.h>
 #include <mpfr.h>
 #include <flint/fmpz.h>
+#include <flint/fmpq.h>
 #include <flint/fmpz-conversions.h>
 
 # ifndef BITS_PER_MP_LIMB
@@ -97,8 +98,8 @@ MA 02111-1307, USA.
 		mpq_set_si(z,i,j);                                             \
 		mpq_canonicalize(z);                                           \
 	} while (0)
-#define MP_double_to_RATIONAL(d,z)	mpq_set_d(z,d)
-#define MP_string_to_RATIONAL(s,z)	rat_gmp_string_2_rat(z,s)
+#define MP_double_to_RATIONAL(d,z)	fmpq_from_double(z, d)
+#define MP_string_to_RATIONAL(s,z)	fmpq_from_string(z, s)
 #define MP_INTEGER_to_RATIONAL(i,r)	mpq_set_z(r,i)
 #define MP_INTINTEGER_to_RATIONAL(i,j,r)                                       \
 	do {                                                                   \
@@ -333,6 +334,20 @@ inline void ext_z_set_mpfr(fmpz_t i, const mpfr_t r){
 	fmpz_get_mpz(arg,i);
 	mpfr_get_z(arg,r,MPFR_RNDZ);
 	fmpz_set_mpz(i,arg);
+}
+
+inline void fmpq_from_double(fmpq_t rat, const double d){
+	mpq_t z;
+	mpq_init(z);
+	mpq_set_d(z,d);
+	fmpq_set_mpq(rat,z);
+}
+
+inline void fmpq_from_string(fmpq_t rat, const char* s){
+	mpq_t z;
+	mpq_init(z);
+	rat_gmp_string_2_rat(z,s);
+	fmpq_set_mpq(rat,z);
 }
 
 #endif /*ifndef MPFR_INTERFACE_H */

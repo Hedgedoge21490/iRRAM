@@ -61,26 +61,26 @@ namespace iRRAM {
 
 RATIONAL::RATIONAL(const INTEGER& i,const INTEGER& j){			//Ich gehe davon aus, dass hier i der Zähler ist.
   fmpq_init(value);
-  fmpq_set_fmpz_frac(fmpq_t value , i.value, j.value)			//value = i / j
+  fmpq_set_fmpz_frac(value , i.value, j.value);		//value = i / j
 }
 
 RATIONAL::RATIONAL(int i, int j){
   fmpq_init(value);
   if ( j >= 0) {
-	mpq_set_si(value, i, (ulong)(j))							//cast war vorher mit (unsigned int)
+	fmpq_set_si(value, i, (ulong)(j));							//cast war vorher mit (unsigned int)
 	} else {
 	INTEGER ii(i);
 	INTEGER jj(j);
-	fmpq_set_fmpz_frac(fmpq_t value , ii.value, jj.value)
+	fmpq_set_fmpz_frac(value , ii.value, jj.value);
 	}
 }
 
-RATIONAL::RATIONAL(const INTEGER& i){							//ich vermute mal, dass hier einfach Zähler i und Nenner 1 sind.
+RATIONAL::RATIONAL(const INTEGER& i){						//ich vermute mal, dass hier einfach Zähler i und Nenner 1 sind.
   fmpq_init(value);
   fmpz_t one;
   fmpz_init(one);
   fmpz_one(one);
-  fmpq_set_fmpz_frac(fmpq_t value , i.value, one)
+  fmpq_set_fmpz_frac(value , i.value, one);
 }
 
 RATIONAL::RATIONAL(int i) {
@@ -98,8 +98,8 @@ RATIONAL::RATIONAL(const RATIONAL& y){
 // Constructing RATIONAL from double, the result is NOT rounded
 //****************************************************************************************
 
-RATIONAL::RATIONAL(double d){			//finde ich nicht
-  MP_rat_init(value);
+RATIONAL::RATIONAL(double d){			//Umweg über mpq.
+  fmpq_init(value);
   MP_double_to_RATIONAL(d,value);
 }
 
@@ -124,7 +124,7 @@ RATIONAL & RATIONAL::operator=(RATIONAL y)			//kein Plan, was std::swap macht ab
 	return *this;
 }
 
-RATIONAL& RATIONAL::operator = (int y){				//setzt value auf fmpq mit wert i
+RATIONAL& RATIONAL::operator = (int i){				//setzt value auf fmpq mit wert i
   fmpq_set_si(value, i, 1);
   return (*this);
 }
@@ -161,6 +161,7 @@ RATIONAL scale(RATIONAL x, int n)
 		n = -n;
 		fmpq_div_2exp(x.value,x.value,n);
 	}
+	return x;
 }
 
 
@@ -228,11 +229,12 @@ RATIONAL & operator*=(RATIONAL &x, const int n)					//es gibt kein mul_si also w
 // Division
 //******************************************************************************
 
-RATIONAL operator / (int x, RATIONAL y)							//Erstellen eines fmpq aus x wie im Konstruktor
+RATIONAL operator / (int x, RATIONAL y)							//Erstellen eines fmpz aus x wie im Konstruktor
 {
-  fmpq_init(denominator);
-  fmpq_set_si(denominator, x, 1);
-  fmpq_div(y.value,denominator,y.value);
+  fmpz_t xz;
+  fmpz_init(xz);
+  fmpz_set_si(xz, x);
+  fmpq_div_fmpz(y.value,y.value,xz);
   return y;
 }
 
@@ -245,9 +247,9 @@ RATIONAL& operator /= (RATIONAL& x, const int n)				//es gibt kein div_si also w
 {
   fmpz_t q;
   fmpz_init(q);													
-  fmpz_set_si(q, y);
-  fmpq_div_fmpz(y.value,y.value,q);
-  return y;
+  fmpz_set_si(q, n);
+  fmpq_div_fmpz(x.value,x.value,q);
+  return x;
 }
 
 
@@ -258,25 +260,25 @@ RATIONAL& operator /= (RATIONAL& x, const int n)				//es gibt kein div_si also w
 /*! \ingroup maths */
 RATIONAL abs(RATIONAL x)
 {
-	fmpq_abs(x.value,x.value);									//check
+	fmpq_abs(x.value,x.value);								//check
 	return x;
 }
 
 INTEGER denominator (const RATIONAL& x){
   fmpz_t zvalue;
   fmpz_init(zvalue);
-  zvalue = x.value.num;											//fmpq ist struct aus fmpz_t namens num und den
+  *zvalue = x.value->num;								//fmpq ist struct aus fmpz_t namens num und den
   return { zvalue, INTEGER::move_t{} };
 }
 
 INTEGER numerator (const RATIONAL& x){
   fmpz_t zvalue;
   fmpz_init(zvalue);
-  zvalue = x.value.den;											//fmpq ist struct aus fmpz_t namens num und den
+  *zvalue = x.value->den;								//fmpq ist struct aus fmpz_t namens num und den
   return { zvalue, INTEGER::move_t{} };
 }
 
-RATIONAL power(RATIONAL x, slong n)								// nie ist etwas unsigned, außer wenn flint signed benutzt ._."
+RATIONAL power(RATIONAL x, slong n)						// nie ist etwas unsigned, außer wenn flint signed benutzt ._."
 {
 	fmpq_pow_si(x.value, x.value, n);
 	return x;
