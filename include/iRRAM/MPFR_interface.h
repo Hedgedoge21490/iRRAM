@@ -27,6 +27,7 @@ MA 02111-1307, USA.
 #include <iRRAM/GMP_intrat.h>
 #include <mpfr.h>
 #include <flint/fmpz.h>
+#include <flint/fmpz-conversions.h>
 
 # ifndef BITS_PER_MP_LIMB
 #  define BITS_PER_MP_LIMB GMP_LIMB_BITS
@@ -79,11 +80,12 @@ MA 02111-1307, USA.
 	} while (0)
 #define MP_int_to_INTEGER(i,z)	mpz_set_si(z,i)
 
-//#define MP_INTEGER_to_mp(i,r)	ext_mpfr_set_z(r,i)
-#define MP_INTEGER_to_mp(i,r)	fmpz_get_mpfr(r, i, MPFR_RNDZ);
+#define MP_INTEGER_to_mp(i,r)	ext_mpfr_set_z(r,i)
+//define MP_INTEGER_to_mp(i,r)	fmpz_get_mpfr(r, i, MPFR_RNDZ) offenbar falsch
 #define MP_INTEGER_to_int(z)	mpz_get_si(z)
 
-#define MP_mp_to_INTEGER(r,i)	mpfr_get_z(i,r,MPFR_RNDZ)
+//#define MP_mp_to_INTEGER(r,i)	mpfr_get_z(i,r,MPFR_RNDZ)
+#define MP_mp_to_INTEGER(r,i) ext_z_set_mpfr(i,r)
 /* here  MPFR_RNDZ is chosen as GMP does a truncation in the corresponding function */
 
 #define MP_double_to_INTEGER(i,z)   mpz_set_d(z,i)
@@ -323,6 +325,14 @@ inline void ext_mpfr_free(struct iRRAM_ext_mpfr_cache_t *cache, mpfr_ptr z)
 		cache->total_freed_var_count++;
 	}
 	cache->ext_mpfr_var_count -= 1;
+}
+
+inline void ext_z_set_mpfr(fmpz_t i, const mpfr_t r){
+	mpz_t arg;
+	mpz_init (arg);
+	fmpz_get_mpz(arg,i);
+	mpfr_get_z(arg,r,MPFR_RNDZ);
+	fmpz_set_mpz(i,arg);
 }
 
 #endif /*ifndef MPFR_INTERFACE_H */

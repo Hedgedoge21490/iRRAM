@@ -213,12 +213,7 @@ inline INTEGER::INTEGER(const std::string &s) : INTEGER(s.c_str()) {}
 
 inline void mpfr_to_INTEGER(MP_type x, fmpz_t f){
 	//fmpz_set_mpfr(x, f, MPFR_RNDZ); existiert leider nicht.
-
-	MP_int_type r;
-	MP_int_init(r);
-	MP_mp_to_INTEGER(x,r);
-	fmpz_set_mpz(f,r);
-	//freigeben von r
+	MP_mp_to_INTEGER(x,f);
 }
 
 inline void INTEGER_to_mpfr(const fmpz_t input, MP_type output){

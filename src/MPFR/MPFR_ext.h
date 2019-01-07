@@ -76,7 +76,7 @@ void ext_mpfr_div(const mpfr_t z1,const mpfr_t z2,mpfr_t z,int p);
 void ext_mpfr_abs(const mpfr_t z1,mpfr_t z);
 void ext_mpfr_truncate(const mpfr_t z1,mpfr_t z);
 
-void ext_mpfr_set_z(mpfr_t r, int_mpfr_type i);
+void ext_mpfr_set_z(mpfr_t r,const fmpz_t i);
 void ext_mpfr_set_f2i(mpfr_t r, int_mpfr_type i);
 
 void ext_mpfr_add_i(const mpfr_t z1, int z2, mpfr_t z, int p);
@@ -449,12 +449,12 @@ inline void ext_mpfr_shift(const mpfr_t z1,mpfr_t z,int n)
   return;
 }
 
-inline void ext_mpfr_set_z(mpfr_t r,int_mpfr_type i)
+inline void ext_mpfr_set_z(mpfr_t r,const fmpz_t i)		//int_mpfr_type i zu fmpz_t i
 {
-  int sib= fmpz_sizeinbase(&i,2);
+  int sib= fmpz_sizeinbase(i,2);
   mpfr_set_prec(r,MAX_OF(32,sib));
   //mpfr_set_z(r,i,iRRAM_mpfr_rounding_mode);
-  fmpz_get_mpfr(r, &i, iRRAM_mpfr_rounding_mode);
+  fmpz_get_mpfr(r, i, iRRAM_mpfr_rounding_mode);
 } 
 
 #endif
