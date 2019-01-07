@@ -150,7 +150,7 @@ TEST-Funktionen					########
 ################################################################
 */
 
-void fmpzIncrementTest(){
+inline void fmpzIncrementTest(){
 	int i_cap = 1000000000;
 
 	std::printf("Incrementiere fmpz um: %d ", i_cap);
@@ -181,7 +181,7 @@ void fmpzIncrementTest(){
 	//fmpz_print(increment);
 }
 
-void fmpzIncrementTestMyAdd(){
+inline void fmpzIncrementTestMyAdd(){
 
 	int i_cap = 1000000000;
 
@@ -213,7 +213,7 @@ void fmpzIncrementTestMyAdd(){
 	//fmpz_print(increment);
 }
 
-void fmpzIncrementTestAddUI(){
+inline void fmpzIncrementTestAddUI(){
 
 	int i_cap = 1000000000;
 
@@ -239,7 +239,7 @@ void fmpzIncrementTestAddUI(){
 
 }
 
-void mpzIncrementTest(){
+inline void mpzIncrementTest(){
 	int i_cap = 1000000000;
 	std::printf("Incrementiere  mpz um: %d ", i_cap);
 
