@@ -108,7 +108,7 @@ RATIONAL::RATIONAL(double d){			//Umweg über mpq.
 //****************************************************************************************
 
 RATIONAL::RATIONAL(const char* s){		//finde ich nicht
-  MP_rat_init(value);
+  fmpq_init(value);
   MP_string_to_RATIONAL(s,value);
 }
 
@@ -306,26 +306,26 @@ bool operator == (const RATIONAL& x, const RATIONAL& y){
 //*****************************************************************************
 // Function swrite
 // string function for RATIONAL
-// writes rational into string
+// writes rational into string	//und was macht der Integer? o.O
 //*****************************************************************************
-/*
+
 std::string swrite(const RATIONAL& x, const int w){
-     char* erg= MP_rat_swritee(x.value,w);
+     char* erg= fmpq_get_str(NULL, w, x.value);
      std::string result=erg;
      free(erg);
      return result;
 }
-*/
+
 //****************************************************************************************
 // swrite: writes RATIONAL to string
 // 1. argument: RATIONAL
 //****************************************************************************************
-/*
+
 std::string swrite(const RATIONAL& x){
-     char* erg= MP_rat_sprintf(x.value);
+     char* erg= fmpq_get_str(NULL, 10, x.value);
      std::string result=erg;
      free(erg);
      return result;  
 }
-*/
+
 } // namespace iRRAM

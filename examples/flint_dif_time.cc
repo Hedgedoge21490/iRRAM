@@ -1,4 +1,4 @@
-//g++ flint_sub_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2
+//g++ flint_dif_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2 -o flint_dif_time
 
 #include <iostream>
 #include <stdio.h>

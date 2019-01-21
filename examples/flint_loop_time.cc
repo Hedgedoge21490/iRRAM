@@ -1,5 +1,5 @@
 
-//g++ flint_loop_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2
+//g++ flint_loop_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2 -o flint_loop_time
 
 #include <iostream>
 #include <stdio.h>
@@ -105,7 +105,7 @@ inline int my_fmpz_equal_ui(const fmpz_t f, ulong g){
 }
 
 //Schleifensteuerung
-void intSchleifensteuerung(){
+void intSchleifensteuerung(int cap){
 	int i_cap = 1000000000;
 	std::printf("Schleifenzähler geht bis: %d ", i_cap);
 
@@ -124,9 +124,29 @@ void intSchleifensteuerung(){
 	std::cout << "  int took " << duration << " cycles. " << std::endl;
 }
 
-void fmpzSchleifensteuerung(){
-	ulong cap = 1000000000;
-	std::printf("Schleifenzähler geht bis: %d ", cap);
+void fmpzSchleifensteuerung(int i_cap){
+	ulong cap = (ulong) i_cap;
+	std::printf("Schleifenzähler geht bis: %d ", i_cap);
+
+	fmpz_t loopCount;
+	fmpz_init(loopCount);
+	fmpz_zero(loopCount);
+
+	//Legt variablen zu Speicherung der Cloclcycles an.
+	uint64_t start, end, duration;
+	start = rdtsc();
+
+	for(fmpz_t loopcount; !fmpz_equal_ui(loopCount, cap); fmpz_add_ui(loopCount, loopCount, 1) ){}
+
+	//Berechnet Clockcycle-Duration und gibt diese aus.
+	end = rdtsc();
+	duration = end - start;
+	std::cout << " fmpz took " << duration << " cycles. " << std::endl;
+}
+
+void fmpzSchleifensteuerungInline(int i_cap){
+	ulong cap = (ulong) i_cap;
+	std::printf("Schleifenzähler geht bis: %d ", i_cap);
 
 	fmpz_t loopCount;
 	fmpz_init(loopCount);
@@ -141,12 +161,12 @@ void fmpzSchleifensteuerung(){
 	//Berechnet Clockcycle-Duration und gibt diese aus.
 	end = rdtsc();
 	duration = end - start;
-	std::cout << " fmpz took " << duration << " cycles. " << std::endl;
+	std::cout << " fmpz took " << duration << " cycles with inline. " << std::endl;
 }
 
-void mpzSchleifensteuerung(){
-	ulong cap = 1000000000;
-	std::printf("Schleifenzähler geht bis: %d ", cap);
+void mpzSchleifensteuerung(int i_cap){
+	ulong cap = (ulong) i_cap;
+	std::printf("Schleifenzähler geht bis: %d ", i_cap);
 
 	mpz_t loopCount;
 	mpz_init(loopCount);
@@ -165,8 +185,10 @@ void mpzSchleifensteuerung(){
 }
 
 int main(){
-	intSchleifensteuerung();
-	fmpzSchleifensteuerung();
-	mpzSchleifensteuerung();
+	int cap = 1000000000;
+	intSchleifensteuerung(cap);
+	fmpzSchleifensteuerung(cap);
+	fmpzSchleifensteuerungInline(cap);
+	mpzSchleifensteuerung(cap);
 	return 0;
 }

@@ -334,6 +334,7 @@ inline void ext_z_set_mpfr(fmpz_t i, const mpfr_t r){
 	fmpz_get_mpz(arg,i);
 	mpfr_get_z(arg,r,MPFR_RNDZ);
 	fmpz_set_mpz(i,arg);
+	mpz_clear(arg);
 }
 
 inline void fmpq_from_double(fmpq_t rat, const double d){
@@ -341,6 +342,7 @@ inline void fmpq_from_double(fmpq_t rat, const double d){
 	mpq_init(z);
 	mpq_set_d(z,d);
 	fmpq_set_mpq(rat,z);
+	mpq_clear(z);
 }
 
 inline void fmpq_from_string(fmpq_t rat, const char* s){
@@ -348,6 +350,7 @@ inline void fmpq_from_string(fmpq_t rat, const char* s){
 	mpq_init(z);
 	rat_gmp_string_2_rat(z,s);
 	fmpq_set_mpq(rat,z);
+	mpq_clear(z);
 }
 
 #endif /*ifndef MPFR_INTERFACE_H */

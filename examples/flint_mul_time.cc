@@ -1,4 +1,4 @@
-//g++ flint_mul_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2
+//g++ flint_mul_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2 -o flint_mul_time
 
 #include <iostream>
 #include <stdio.h>
@@ -101,7 +101,7 @@ void intMulTest(){
 	std::cout << "  int took " << duration << " cycles. " << std::endl;
 }
 
-void fmpzMulTest(){
+void fmpzMulTestInline(){
 	int cap = 1000000000;
 	std::printf("Führe %d Multiplikationen aus ", cap);
 
@@ -120,6 +120,33 @@ void fmpzMulTest(){
 
 	for(int i = 0; i < cap ; i++){
 		my_fmpz_mul(result, fac1, fac2);
+	}
+
+	//Berechnet Clockcycle-Duration und gibt diese aus.
+	end = rdtsc();
+	duration = end - start;
+	std::cout << " fmpz took " << duration << " cycles mit inlining. " << std::endl;
+}
+
+void fmpzMulTest(){
+	int cap = 1000000000;
+	std::printf("Führe %d Multiplikationen aus ", cap);
+
+	fmpz_t fac1;
+	fmpz_init(fac1);
+	fmpz_set_ui(fac1, 42L);
+	fmpz_t fac2;
+	fmpz_init(fac2);
+	fmpz_set_ui(fac1, 1337L);
+	fmpz_t result;
+	fmpz_init(result);
+
+	//Legt variablen zu Speicherung der Cloclcycles an.
+	uint64_t start, end, duration;
+	start = rdtsc();
+
+	for(int i = 0; i < cap ; i++){
+		fmpz_mul(result, fac1, fac2);
 	}
 
 	//Berechnet Clockcycle-Duration und gibt diese aus.
@@ -157,6 +184,7 @@ void mpzMulTest(){
 
 int main(){
 	intMulTest();
+	fmpzMulTestInline();
 	fmpzMulTest();
 	mpzMulTest();
 	return 0;

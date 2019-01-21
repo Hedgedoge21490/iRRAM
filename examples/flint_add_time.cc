@@ -1,5 +1,7 @@
 
-//g++ flint_add_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2 -o flint-add-time
+//g++ flint_add_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -I/home/hansus/Dev/ForschungsPraktikum/gmp-6.1.2 -o flint_add_time
+
+//g++ flint_add_time.cc -O2 -lpthread -lmpfr -lgmp -lflint -I/home/hansus/Dev/ForschungsPraktikum/flint2 -o flint_add_time
 
 #include <iostream>
 #include <stdio.h>
@@ -207,13 +209,39 @@ inline void fmpzIncrementTestMyAdd(){
 	//Berechnet Clockcycle-Duration und gibt diese aus.
 	end = rdtsc();
 	duration = end - start;
-	std::cout << " fmpz took " << duration << " cycles with local addition. " << std::endl;
+	std::cout << " fmpz took " << duration << " cycles with inline addition. " << std::endl;
 
 	//Ausgabefunktion für fmpz.
 	//fmpz_print(increment);
 }
 
 inline void fmpzIncrementTestAddUI(){
+
+	int i_cap = 1000000000;
+
+	std::printf("Incrementiere fmpz um: %d ", i_cap);
+
+	fmpz_t increment;
+	fmpz_init(increment);
+	fmpz_set_ui(increment, 0L);
+
+	//Legt variablen zu Speicherung der Cloclcycles an.
+	uint64_t start, end, duration;
+	start = rdtsc();
+
+	//Schleife, die gemessen wird.
+	for(int i = 0; i < i_cap; i++){
+		fmpz_add_ui(increment, increment, 1);
+	}
+
+	//Berechnet Clockcycle-Duration und gibt diese aus.
+	end = rdtsc();
+	duration = end - start;
+	std::cout << " fmpz took " << duration << " cycles with inline add_ui method. " << std::endl;
+
+}
+
+inline void fmpzIncrementTestMyAddUI(){
 
 	int i_cap = 1000000000;
 
@@ -295,9 +323,11 @@ int main(){
 
 	fmpzIncrementTest();
 	fmpzIncrementTestMyAdd();
+	fmpzIncrementTestMyAddUI();
 	fmpzIncrementTestAddUI();
 	mpzIncrementTest();
 	intIncrementTestVolatile();
+	
 	//intIncrementTest();
 
 	return 0;
