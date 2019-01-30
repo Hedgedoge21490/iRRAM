@@ -267,14 +267,14 @@ RATIONAL abs(RATIONAL x)
 INTEGER denominator (const RATIONAL& x){
   fmpz_t zvalue;
   fmpz_init(zvalue);
-  *zvalue = x.value->num;								//fmpq ist struct aus fmpz_t namens num und den
+  *zvalue = x.value->den;								//fmpq ist struct aus fmpz_t namens num und den
   return { zvalue, INTEGER::move_t{} };
 }
 
 INTEGER numerator (const RATIONAL& x){
   fmpz_t zvalue;
   fmpz_init(zvalue);
-  *zvalue = x.value->den;								//fmpq ist struct aus fmpz_t namens num und den
+  *zvalue = x.value->num;								//fmpq ist struct aus fmpz_t namens num und den
   return { zvalue, INTEGER::move_t{} };
 }
 
