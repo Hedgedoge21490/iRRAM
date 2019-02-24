@@ -15,10 +15,14 @@ uint64_t rdtsc()
 void compute(){
 		
 	//INIT
-	INTEGER loopcap 	= 10000000;
+	INTEGER loopcap 	= 1000000;
+
+	INTEGER largestuff = INTEGER(10);
+	largestuff = power(largestuff,100);
 	
 	RATIONAL c = RATIONAL(3.75);
-	RATIONAL f = RATIONAL(99991);
+	RATIONAL f = RATIONAL(largestuff);
+	largestuff += 1;
 	RATIONAL x = RATIONAL(0.5);
 	RATIONAL emx;;
 	INTEGER xint;

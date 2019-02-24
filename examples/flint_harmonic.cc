@@ -17,11 +17,14 @@ void fmpzHarmonic(int i_cap){
 	fmpz_t loopCount;
 	fmpz_init_set_ui(loopCount, 1);
 	double result = 0;
+
+	fmpz_t fmpz_cap;
+	fmpz_init_set_si(fmpz_cap, i_cap);
 	
 	uint64_t start, end, duration;
 	start = rdtsc();
 
-	for(loopCount; !fmpz_equal_ui(loopCount, i_cap); fmpz_add_ui(loopCount, loopCount, 1) ){
+	for(loopCount; !fmpz_equal(loopCount, fmpz_cap); fmpz_add_ui(loopCount, loopCount, 1) ){
 		ulong div = fmpz_get_ui(loopCount);
 		result += (1.0 / div);
 	}
@@ -39,10 +42,14 @@ void mpzHarmonic(int i_cap){
 	mpz_set_ui(loopCount, 1L);
 	double result;
 
+	mpz_t mpz_cap;
+	mpz_init(mpz_cap);
+	mpz_set_ui(mpz_cap, i_cap);
+
 	uint64_t start, end, duration;
 	start = rdtsc();
 
-	for(loopCount; mpz_cmp_ui(loopCount, i_cap) != 0; mpz_add_ui(loopCount, loopCount, 1) ){
+	for(loopCount; mpz_cmp(loopCount, mpz_cap) != 0; mpz_add_ui(loopCount, loopCount, 1) ){
 		ulong div = mpz_get_ui(loopCount);
 		result += (1.0 / div);
 	}
