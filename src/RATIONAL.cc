@@ -117,7 +117,7 @@ RATIONAL::RATIONAL(const char* s){		//finde ich nicht
 // left side (this) is already initialized
 //******************************************************************************
 
-RATIONAL & RATIONAL::operator=(RATIONAL y)			//kein Plan, was std::swap macht aber ändert wohl nichts
+RATIONAL & RATIONAL::operator=(RATIONAL y)			
 {
 	using std::swap;
 	swap(value, y.value);

@@ -579,8 +579,15 @@ inline std::string swrite(const INTEGER& x){
     return result;
 }
 
+inline void clear_flint_cache(){
+	flint_cleanup();
+}
+
 // Conversion from INTEGER to smaller types
 inline INTEGER::operator int() const { return fmpz_get_si(value); }		//macht aus dem value ein slong glaube ich. Geht das? Aber undefined wenn es nicht passt.
 } /* ! namespace iRRAM */
+
+
+
 
 #endif /* ! iRRAM_INTEGER_H */
