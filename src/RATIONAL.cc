@@ -271,6 +271,7 @@ INTEGER denominator (const RATIONAL& x){
   return { zvalue, INTEGER::move_t{} };
 }
 
+
 INTEGER numerator (const RATIONAL& x){
   fmpz_t zvalue;
   fmpz_init(zvalue);
